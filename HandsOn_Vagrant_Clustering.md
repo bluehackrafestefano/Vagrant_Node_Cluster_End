@@ -57,10 +57,10 @@ config.vm.network "forwarded_port", guest: 3000, host: 8080
 
 - The synced folder setting is here on line 46. However we're going to leave it commented. We're going to use the default synced folder behavior to synchronize the code between the host and box. Vagrant will automatically sync the vagrant environment folder on the host with a slash vagrant directory mounted to the root of the vagrant VM. We added a vagrant file to the root directory of this node application which in turn made it into a vagrant environment. As we edit the code on the host here in VSCode, the changes will be synchronized to the vagrant directory in the vagrant box. 
 
-- Our next configuration change is here in the provider settings. You'll need to uncomment line 59 and line 64 and line 65. This ubuntu based VM doesn't need a whole gigabyte of memory, and for our testing purposes, the Node application doesn't need that much either. So we'll change the setting here to 512 for the memory. 
+- Our next configuration change is here in the provider settings. You'll need to uncomment line 59 and line 64 and line 65.
 ```ruby
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "512"
+    vb.memory = "1024"
   end
 ```
 
@@ -81,6 +81,17 @@ The final command in the script starts on line 24. The curl command executes htt
 ```sh
 vagrant up
 ```
+
+Workaround for now for me was to disable the VirtualMachinePlatform feature in windows by running:
+
+Disable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform"
+
+When I need to use Docker, I'll re-enable the feature:
+
+Enable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform"
+
+Depending on your setup/Windows version, you may need to use DSIM.
+
 
 The box will start, and you'll see the provisioners execute. The provisioners will install MongoDB, Node, the PM2 process manager and then call the web service to add a sample task. 
 
