@@ -237,6 +237,10 @@ The Node application server still needs port forwarding to expose the applicatio
 
 As above, this block sets the memory to 512 megabytes. Together, both boxes take up about a gigabyte of RAM. The Node box is on the same private network as the Mongo box with a different fixed IP address. And the provisioner is the same as we've used before to install and configure Node.
 
+- Lastly we need to change line 9 in server.js to reflect our private ip settings;
+```js
+mongoose.connect('mongodb://192.168.33.20:27017/Tododb');
+```
 
 The Vagrant life is now complete. Open the terminal and execute;
 ```sh
