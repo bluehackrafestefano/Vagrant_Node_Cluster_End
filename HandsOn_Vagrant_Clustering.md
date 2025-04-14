@@ -85,11 +85,13 @@ vagrant up
 
 The box will start, and you'll see the provisioners execute. The provisioners will install MongoDB, Node, the PM2 process manager and then call the web service to add a sample task. 
 
-- After the vagrant up command completes, open a web browser and go to [localhost:8080/tasks](localhost:8080/tasks). You will see a block of JSON data. If we return to the Node install script, we can see that the task returned in the browser is the one added by the script.
+- After the `vagrant up` command completes, open a web browser and go to `localhost:8080/tasks`. You will see a block of JSON data. If we return to the Node install script, we can see that the task returned in the browser is the one added by the script.
 
-- Now that our application is running, let's demonstrate the developer workflow. We'll make a change to the application in Visual Studio code, which will be automatically synchronized to the code running in the box. 
+### Developer Workflow
 
-- Return to the browser and let's take a look at the JSON data. We can see that each task has a status attribute. Now try this. Go to tasks/status/pending. You'll get a 404 error because that route is currently undefined. Let's suppose that we want to be able to query this service for tasks by status. We'll make the change needed to the code, then demonstrate that it works. I'll make the change needed to implement this route. Again, don't worry about understanding the code. We're just demonstrating that edits to the files in the host are copied to the box. 
+- Now that our application is running, let's demonstrate the developer workflow. We'll make a change to the application in VSCode, which will be automatically synchronized to the code running in the box. 
+
+- Return to the browser and let's take a look at the JSON data. We can see that each task has a status attribute. Now try this. Go to `localhost:8080/tasks/status/pending`. You'll get a 404 error because that route is currently undefined. Let's suppose that we want to be able to query this service for tasks by status. We'll make the change needed to the code, then demonstrate that it works. I'll make the change needed to implement this route. Again, don't worry about understanding the code. We're just demonstrating that edits to the files in the host are copied to the box. 
 
 - So our first step will be to go to the routes and we will uncomment the code here. `api/routes/todoListRoutes.js` lines 16-17.
 

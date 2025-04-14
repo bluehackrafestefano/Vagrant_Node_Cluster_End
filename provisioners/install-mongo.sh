@@ -14,7 +14,7 @@ sudo apt-get install mongodb-org -y
 # sudo apt-get install -y mongodb-org --allow-unauthenticated
 
 # Copy custom mongo config
-sudo mv mongod.conf /etc/mongod.conf
+sudo mv /vagrant/files/mongod.conf /etc/mongod.conf
 
 # Enable mongo to start after reboot
 sudo systemctl enable mongod
