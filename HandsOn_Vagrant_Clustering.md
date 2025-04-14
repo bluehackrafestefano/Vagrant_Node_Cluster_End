@@ -259,7 +259,12 @@ This command includes the Node-named definition. To connect to the Mongo server 
 vagrant ssh mongo
 ```
 
-- Here's a quick quiz. What command could you execute here in the Node server to query the ToDoList web service? Here's a hint. We need to use curl. What would the command be? Think about how port forwarding is set up. Take a look here at the URL we used from the host browser. What port is Node listening on in the Node application server? Here's the answer: curl http://localhost:3000/tasks. Remember, Node is listening on port 3000 in the Node application box. The port forwarding configuration makes that service available to the host on port 8080. 
+- Here's a quick quiz. What command could you execute here in the Node server to query the ToDoList web service? Here's a hint. We need to use curl. What would the command be? Think about how port forwarding is set up. Take a look here at the URL we used from the host browser. What port is Node listening on in the Node application server? Here's the answer: curl http://localhost:3000/tasks. Remember, Node is listening on port 3000 in the Node application box. The port forwarding configuration makes that service available to the host on port 8080.
+
+- At the end of the session delete the boxes:
+```sh
+vagrant destroy
+```
 
 ### Conclusion
 
