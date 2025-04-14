@@ -106,27 +106,160 @@ Let's take a minute to think about how vagrant can impact software development b
 
 Also, keep in mind that every app is different. For example, we could write a variant of this application that uses MySQL or PostgreSQL instead of MongoDB. If you start including a vagrant file with the applications you write, you'll include the runtime definitions of your application along with the code. You then won't have to remember how to set up the environment for your applications because the environment is defined with the code. Even better, you won't have to set it up for anyone else as long as they're also using vagrant.
 
+### Cleanup
+
+- Exit from the box, delete the box and Vagrantfile to prepare for the next part of the hands-on:
+```sh
+exit
+vagrant destroy
+rm Vagrantfile
+rm -r node_modules
+rm -r .vagrant
+```
+
 ## Clustering
 
-By default, Vagrantfiles start a single box. This is certainly useful for testing software in a sandbox environment, but it's not how applications are usually run in production environments. Test environments often combine application tiers such as application and database in a single server. Production  infrastructures typically separate those roles and run apps on one server and databases on a separate server. Vagrant can run boxes in the same way, with multi-machine Vagrant files. Here is an illustration of a more production-like environment. 
+By default, Vagrantfiles start a single box. This is certainly useful for testing software in a sandbox environment, but it's not how applications are usually run in production environments. Test environments often combine application tiers such as application and database in a single server. Production  infrastructures typically separate those roles and run apps on one server and databases on a separate server. Vagrant can run boxes in the same way, with multi-machine Vagrantfiles. Here is an illustration of a more production-like environment. 
 
 ![Vagrant Cluster](cluster.png)
 
-Node and Mongo each have their own box. The boxes run on a private network so they can communicate with each other and the host through Vagrant, but they're isolated from other networks. In this context, remote simply means that the Mongo database is running on a different server from the Node application.
+Node and Mongo each have their own box. The boxes run on a private network so they can communicate with each other and the host through Vagrant, but they're isolated from other networks. In this context, `remote simply` means that the Mongo database is running on a different server from the Node application.
+
+- We'll create a new Vagrantfile;
+```sh
+vagrant init bento/ubuntu-20.04
+```
+
+- Open the Vagrantfile. The Vagrant file can define any number of boxes. The first step is to create the definitions. Look at the statement on line eight. This statement creates a config object, which is used to edit the settings of the box. You'll notice that most of the other lines here start with the config object with dot notated properties. We can create a new object using define. 
+
+### Configure MongoDB
+
+- Add a new line after line 14, and enter;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+  end
+```
+
+This will be the definition of a separate Mongo database server. The block creates a nested configuration for a box that we're calling mongo. You can use any word you want to describe a box. The word you choose must be exactly the same between the quotes and the pipes. 
+
+- Now, add a line between the define and end statements;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+    mongo.vm.box = "bento/ubuntu-20.04"
+  end
+```
+
+Note that the beginning of this line is `mongo` instead of `config`. The define statement has created a new object to work with, the mongo object. We can now configure the mongo box using all the same statements as before, as long as they are within this block and prepended with mongo. The statements in this block will have no effect on any other defined blocks, as we'll see shortly.
+
+- Now, let's enter, after this line;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+    mongo.vm.box = "bento/ubuntu-20.04"
+    mongo.vm.provider "virtualbox"do |vb|
+      vb.memory = "512"
+    end
+  end
+```
+
+The provider configuration is also a block with an end statement. This block creates a vb object to work with the settings for the VirtualBox provider. Here, we've set the RAM allocation to 512 megabytes.
+
+- Now we'll use a private network to connect the two boxes defined by this Vagrant file. After this end statement, enter;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+    mongo.vm.box = "bento/ubuntu-20.04"
+    mongo.vm.provider "virtualbox"do |vb|
+      vb.memory = "512"
+    end
+    mongo.vm.network "private_network", ip: "192.168.33.20"
+  end
+```
+
+This statement will use a private network for the Mongo box and use a fixed IP address. The Node application will connect to the Mongo database by IP. 
+
+- Mongo won't work out of the box in this setup. It needs a customized configuration to allow connections from remote servers. That configuration is stored in a config file. We'll use a file provisioner to copy a customized config file from the host to the box. Our customized config file is already here in the files directory, so we'll add;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+    mongo.vm.box = "bento/ubuntu-20.04"
+    mongo.vm.provider "virtualbox"do |vb|
+      vb.memory = "512"
+    end
+    mongo.vm.network "private_network", ip: "192.168.33.20"
+    mongo.vm.provision "file", source: "files/mongod.conf", destination: "~/mongod.conf"
+  end
+```
+
+- The last statement we need in this block is the provisioner. This is the same provisioner we've used before;
+```ruby
+  config.vm.define, "mongo" do |mongo|
+    mongo.vm.box = "bento/ubuntu-20.04"
+    mongo.vm.provider "virtualbox"do |vb|
+      vb.memory = "512"
+    end
+    mongo.vm.network "private_network", ip: "192.168.33.20"
+    mongo.vm.provision "file", source: "files/mongod.conf", destination: "~/mongod.conf"
+    mongo.vm.provision "shell", path: "provisioners/install-mongo.sh"
+  end
+```
+
+### Configrue Node
+
+- The Mongo database server configuration is now complete. We're ready to start the Node application server configuration. Below the Mongo block end statement, enter;
+```ruby
+  config.vm.define, "node" do |node|
+    node.vm.box = "bento/ubuntu-20.04"
+  end
+```
+
+This is the Node application server block. This box also uses the Ubuntu 20.04 base box.
+
+- Below this line;
+```ruby
+  config.vm.define, "node" do |node|
+    node.vm.box = "bento/ubuntu-20.04"
+    node.vm.network "forwarded_port", guest: 3000, host: 8080
+  end
+```
+
+The Node application server still needs port forwarding to expose the application to the host browser. Port forwarding works with private networks because the host is included in the private network.
+
+- Lets add other configurations for Node;
+```ruby
+  config.vm.define, "node" do |node|
+    node.vm.box = "bento/ubuntu-20.04"
+    node.vm.network "forwarded_port", guest: 3000, host: 8080
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+    end
+    node.vm.network "private_network", ip: "192.168.33.10"
+    node.vm.provision "shell", path: "provisioners/install-node.sh"
+  end
+```
+
+As above, this block sets the memory to 512 megabytes. Together, both boxes take up about a gigabyte of RAM. The Node box is on the same private network as the Mongo box with a different fixed IP address. And the provisioner is the same as we've used before to install and configure Node.
 
 
+The Vagrant life is now complete. Open the terminal and execute;
+```sh
+vagrant up
+```
 
+- After the startup is complete, you should be able to go to a browser and visit `localhost:8080/tasks`.
 
+- Connecting to boxes started by a multi-machine Vagrant file is a little different from before. Vagrant ssh will connect to a single box. To connect to our Node or Mongo box, we need to include the name of the box as defined in the Vagrant file. In the terminal pane, execute;
+```sh
+vagrant ssh node
+```
 
-We'll start with a new Vagrant file and use the Node ToDoList web service application code at GitHub.com/dswersky/node_vagrant_multi, or you can open it from the exercise files. Once you've cloned the repository, you can open it with VSCode and open the terminal window with Control + ~. 
+This command includes the Node-named definition. To connect to the Mongo server use;
+```sh
+vagrant ssh mongo
+```
 
+- Here's a quick quiz. What command could you execute here in the Node server to query the ToDoList web service? Here's a hint. We need to use curl. What would the command be? Think about how port forwarding is set up. Take a look here at the URL we used from the host browser. What port is Node listening on in the Node application server? Here's the answer: curl http://localhost:3000/tasks. Remember, Node is listening on port 3000 in the Node application box. The port forwarding configuration makes that service available to the host on port 8080. 
 
-We'll use vagrant init bento/ubuntu-16.04 to create our Vagrant file, and let's also check to make sure we don't have any other running boxes. And if we do, we can stop them with vagrant halt. 
+### Conclusion
 
-Now we can open the Vagrant file. The Vagrant file can define any number of boxes. The first step is to create the definitions. Look at the statement on line eight. This statement creates a config object, which is used to edit the settings of the box. You'll notice that most of the other lines here start with the config object with dot notated properties. We can create a new object using define. Add a new line after line 14, and enter config.vm.define, "mongo" do |mongo|. And then enter, and on the next line, end. This will be the definition of a separate Mongo database server. The block creates a nested configuration for a box that we're calling mongo. You can use any word you want to describe a box. The word you choose must be exactly the same between the quotes and the pipes. Now, add a line between the define and end statements and enter mongo.vm.box = "bento/ubuntu-16.04." Note that the beginning of this line is mongo instead of config. The define statement has created a new object to work with, the mongo object. We can now configure the mongo box using all the same statements as before, as long as they are within this block and prepended with mongo. The statements in this block will have no effect on any other defined blocks, as we'll see shortly. Now, let's enter, after this line, mongo.vm.provider "virtualbox" do |vb|, and then hit enter and type end. And now between these two lines, we're going to set vb.memory = "512." This is the same provider block we've seen before. Note that the provider configuration is also a block with an end statement. This block creates a vb object to work with the settings for the VirtualBox provider. Here, we've set the RAM allocation to 512 megabytes. Now we'll use a private network to connect the two boxes defined by this Vagrant file. After this end statement, enter mongo.vm.network "private_network", ip: "192.168.33.20." This statement will use a private network for the Mongo box and use a fixed IP address. The Node application will connect to the Mongo database by IP. Mongo won't work out of the box in this setup. It needs a customized configuration to allow connections from remote servers. That configuration is stored in a config file. We'll use a file provisioner to copy a customized config file from the host to the box. Our customized config file is already here in the files directory, so we'll add mongo.vm.provision "file", source: "files/mongod.conf", destination: "~/mongod.conf." The last statement we need in this block is the provisioner. This is the same provisioner we've used before. Mongo.vm.provision "shell", path: "provisioners/install-mongo.sh." The Mongo database server configuration is now complete. We're ready to start the Node application server configuration. Below the Mongo block end statement, enter, config.vm.define "node" do |node|. And then on the next line, end. This is the Node application server block. Now between these lines, add, node.vm.box = "bento/ubuntu-16.04." This box also uses the Ubuntu 16.04 base box. Below this line, node.vm.network "forwarded_port", guest: 3000, host: 8080. The Node application server still needs port forwarding to expose the application to the host browser. Port forwarding works with private networks because the host is included in the private network. Our next line's node.vm.provider "virtualbox" do |vb|, and then we'll close that block with end. And then once again, vb.memory = "512." As above, this block sets the memory to 512 megabytes. Together, both boxes take up about a gigabyte of RAM. Next line, after the end block, node.vm.network "private_network", ip: "192.168.33.10." The Node box is on the same private network as the Mongo box with a different fixed IP address. And now finally, the provisioner. Node.vm.provision "shell", path: "provisioners/install-node.sh." Once again, the provisioner is the same as we've used before to install and configure Node. The Vagrant life is now complete. Open the terminal pain and execute vagrant up. After the startup is complete, you should be able to go to a browser and visit localhost:8080/tasks. Go ahead and try that now. Connecting to boxes started by a multi-machine Vagrant file is a little different from before. Vagrant ssh will connect to a single box. To connect to our Node or Mongo box, we need to include the name of the box as defined in the Vagrant file. In the terminal pane, execute vagrant ssh node. This command includes the Node-named definition. We could execute vagrant ssh mongo to connect to the Mongo server. Here's a quick quiz. What command could you execute here in the Node server to query the ToDoList web service? Here's a hint. We need to use curl. What would the command be? Think about how port forwarding is set up. Take a look here at the URL we used from the host browser. What port is Node listening on in the Node application server? Here's the answer: curl http://localhost:3000/tasks. Remember, Node is listening on port 3000 in the Node application box. The port forwarding configuration makes that service available to the host on port 8080. This completes our multi-machine Vagrant file. So, why would we want to run multiple boxes? A production configuration helps you design and test your application in a real-world setting. I had to make some changes to the application and the Mongo configuration to allow the Node application server to connect to the Mongo server. By separating the servers, I was able to set up an infrastructure that would be valid in a production environment. Addressing that concern early in the development process is a good devops process.
-
-
-
+This completes our multi-machine Vagrant file. So, why would we want to run multiple boxes? A production configuration helps you design and test your application in a real-world setting. I had to make some changes to the application and the Mongo configuration to allow the Node application server to connect to the Mongo server. By separating the servers, I was able to set up an infrastructure that would be valid in a production environment. Addressing that concern early in the development process is a good devops process.
 
 <br>
 
