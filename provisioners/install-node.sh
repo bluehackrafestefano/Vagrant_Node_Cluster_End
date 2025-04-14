@@ -20,7 +20,7 @@ pm2 save                          # save the current config for restarts
 pm2 startup                       # enable PM2 startup system
 
 # Add PM2 configuration to systemd to restart application on reboot
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u vagrant --hp /home/vagrant
+sudo env PATH=$PATH:/usr/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u vagrant --hp /home/vagrant
 
 # Wait for service start
 while ! nc -z localhost 3000; do   
