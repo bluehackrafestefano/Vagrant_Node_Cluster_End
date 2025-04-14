@@ -136,7 +136,7 @@ vagrant init bento/ubuntu-20.04
 
 - Add a new line after line 14, and enter;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
   end
 ```
 
@@ -144,7 +144,7 @@ This will be the definition of a separate Mongo database server. The block creat
 
 - Now, add a line between the define and end statements;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
     mongo.vm.box = "bento/ubuntu-20.04"
   end
 ```
@@ -153,7 +153,7 @@ Note that the beginning of this line is `mongo` instead of `config`. The define 
 
 - Now, let's enter, after this line;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
     mongo.vm.box = "bento/ubuntu-20.04"
     mongo.vm.provider "virtualbox"do |vb|
       vb.memory = "512"
@@ -165,7 +165,7 @@ The provider configuration is also a block with an end statement. This block cre
 
 - Now we'll use a private network to connect the two boxes defined by this Vagrant file. After this end statement, enter;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
     mongo.vm.box = "bento/ubuntu-20.04"
     mongo.vm.provider "virtualbox"do |vb|
       vb.memory = "512"
@@ -178,7 +178,7 @@ This statement will use a private network for the Mongo box and use a fixed IP a
 
 - Mongo won't work out of the box in this setup. It needs a customized configuration to allow connections from remote servers. That configuration is stored in a config file. We'll use a file provisioner to copy a customized config file from the host to the box. Our customized config file is already here in the files directory, so we'll add;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
     mongo.vm.box = "bento/ubuntu-20.04"
     mongo.vm.provider "virtualbox"do |vb|
       vb.memory = "512"
@@ -190,7 +190,7 @@ This statement will use a private network for the Mongo box and use a fixed IP a
 
 - The last statement we need in this block is the provisioner. This is the same provisioner we've used before;
 ```ruby
-  config.vm.define, "mongo" do |mongo|
+  config.vm.define "mongo" do |mongo|
     mongo.vm.box = "bento/ubuntu-20.04"
     mongo.vm.provider "virtualbox"do |vb|
       vb.memory = "512"
@@ -205,7 +205,7 @@ This statement will use a private network for the Mongo box and use a fixed IP a
 
 - The Mongo database server configuration is now complete. We're ready to start the Node application server configuration. Below the Mongo block end statement, enter;
 ```ruby
-  config.vm.define, "node" do |node|
+  config.vm.define "node" do |node|
     node.vm.box = "bento/ubuntu-20.04"
   end
 ```
@@ -214,7 +214,7 @@ This is the Node application server block. This box also uses the Ubuntu 20.04 b
 
 - Below this line;
 ```ruby
-  config.vm.define, "node" do |node|
+  config.vm.define "node" do |node|
     node.vm.box = "bento/ubuntu-20.04"
     node.vm.network "forwarded_port", guest: 3000, host: 8080
   end
@@ -224,7 +224,7 @@ The Node application server still needs port forwarding to expose the applicatio
 
 - Lets add other configurations for Node;
 ```ruby
-  config.vm.define, "node" do |node|
+  config.vm.define "node" do |node|
     node.vm.box = "bento/ubuntu-20.04"
     node.vm.network "forwarded_port", guest: 3000, host: 8080
     node.vm.provider "virtualbox" do |vb|
