@@ -4,6 +4,7 @@
 <br>
 
 ## Application developer environment overview
+
 Now we're going to bring together the CLI commands and Vagrant features to fully demonstrate the power of Vagrant, defining an isolated, portable development environment. To do that, we'll need a platform and the code for an application. 
 
 We'll be using a simple Node application to demonstrate the steps required to create a Node runtime and development environment. Don't worry if you don't know Node or JavaScript. The purpose is not to teach you how to write a Node application. While these steps will be specific to Node, the concepts are generally applicable to any platform. This could be a .NET, Java, Python, Ruby, or any other type of application. The steps we'll be demonstrating will apply in some way to all of those platforms.
@@ -24,6 +25,7 @@ rm -rf .git
 This is a very simple Node application that exposes a to-do list web service. The web service returns a list of to-do tasks and accepts post requests to add and update tasks. 
 
 ### Planning
+
 - We'll be adding a Vagrant file to this code to define a Node development environment. 
 - We'll be using the default synchronized folder. The application code will reside on the host, and we'll use a synced folder to automatically synchronize that code with the code in the Vagrant box. This will allow us to edit the code in Visual Studio code on the host, and see the changes take effect as they're synchronized with the box. 
 - We'll use port forwarding to expose the Node application to the host browser. We'll use a provider to tweak the provider settings to set the right amount of memory for our application. 
@@ -39,6 +41,7 @@ The result of this set-up will be a custom box based on the Ubuntu 20.04 base bo
 This diagram illustrates a single server test environment. The entire application, including both Node and MongoDB, are run in a single box. The box runs on a standard network configuration using port forwarding to expose the Node application. 
 
 ## Creating a developer environment
+
 - Before we get started use the vagrant global status command to check for any other running boxes. If there are any other boxes running you can use vagrant halt and the ID to stop them;
 ```sh
 vagrant global-status
@@ -95,14 +98,13 @@ The box will start, and you'll see the provisioners execute. The provisioners wi
 
 - So our first step will be to go to the routes and we will uncomment the code here. `api/routes/todoListRoutes.js` lines 16-17.
 
-- And then we'll go to the controllers. And then we'll uncomment this method here. `api/controllers/todoListController.js` lines 32-38. And save as we go. Now return to the browser, and we should be able to refresh. This time, instead of a 404 error, we see the task that was entered when the box was provisioned. 
+- And then we'll go to the controllers. And then we'll uncomment this method here. `api/controllers/todoListController.js` lines 32-38. And save as we go. Now return to the browser, and we should be able to refresh. This time, instead of a 404 error, we see the task that was entered when the box was provisioned.
 
-Modifying the code in VS code automatically copied it into the flash vagrant directory in the box, which is where the code for the application is actually running. 
+Modifying the code in VS code automatically copied it into the /vagrant directory in the box, which is where the code for the application is actually running. 
 
 Let's take a minute to think about how vagrant can impact software development by making these purpose built environments possible. Adding a vagrant file to this or any code repository alleviates the need to know how to set up a runtime and development environment. It doesn't end there. The vagrant files and provisioners are a self documenting application runtime configuration. By reading the vagrant file and provisioning scripts, a developer can quickly learn how to set up the environment for a given code base. 
 
-Also, keep in mind that every app is different. For example, we could write a variant of this application that uses MySQL or postgres instead of MongoDB. If you start including a vagrant file with the applications you write, you'll include the runtime definitions of your application along with the code. You then won't have to remember how to set up the environment for your applications because the environment is defined with the code. Even better, you won't have to set it up for anyone else as long as they're also using vagrant.
-
+Also, keep in mind that every app is different. For example, we could write a variant of this application that uses MySQL or PostgreSQL instead of MongoDB. If you start including a vagrant file with the applications you write, you'll include the runtime definitions of your application along with the code. You then won't have to remember how to set up the environment for your applications because the environment is defined with the code. Even better, you won't have to set it up for anyone else as long as they're also using vagrant.
 
 ## Clustering
 
