@@ -5,7 +5,7 @@
 
 ## Application developer environment overview
 
-Now we're going to bring together the CLI commands and Vagrant features to fully demonstrate the power of Vagrant, defining an isolated, portable development environment. To do that, we'll need a platform and the code for an application. 
+With the help of this hands-on we're going to bring together the CLI commands and Vagrant features to fully demonstrate the power of Vagrant, defining an isolated, portable development environment. To do that, we'll need a platform and the code for an application. 
 
 We'll be using a simple Node application to demonstrate the steps required to create a Node runtime and development environment. Don't worry if you don't know Node or JavaScript. The purpose is not to teach you how to write a Node application. While these steps will be specific to Node, the concepts are generally applicable to any platform. This could be a .NET, Java, Python, Ruby, or any other type of application. The steps we'll be demonstrating will apply in some way to all of those platforms.
 

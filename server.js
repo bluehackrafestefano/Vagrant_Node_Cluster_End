@@ -6,8 +6,10 @@ var express = require('express'),
     bodyParser = require('body-parser');
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://192.168.33.20:27017/Tododb');
-// mongoose.connect('mongodb://localhost:27017/Tododb');
+// For single node:
+mongoose.connect('mongodb://localhost:27017/Tododb');
+// For cluster
+// mongoose.connect('mongodb://192.168.33.20:27017/Tododb');
 process.send = process.send || function () {};
 
 app.use(bodyParser.urlencoded({extended: true}));
