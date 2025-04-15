@@ -176,18 +176,6 @@ The provider configuration is also a block with an end statement. This block cre
 
 This statement will use a private network for the Mongo box and use a fixed IP address. The Node application will connect to the Mongo database by IP. 
 
-- Mongo won't work out of the box in this setup. It needs a customized configuration to allow connections from remote servers. That configuration is stored in a config file. We'll use a file provisioner to copy a customized config file from the host to the box. Our customized config file is already here in the files directory, so we'll add;
-```ruby
-  config.vm.define "mongo" do |mongo|
-    mongo.vm.box = "bento/ubuntu-20.04"
-    mongo.vm.provider "virtualbox"do |vb|
-      vb.memory = "512"
-    end
-    mongo.vm.network "private_network", ip: "192.168.33.20"
-    mongo.vm.provision "file", source: "files/mongod.conf", destination: "~/mongod.conf"
-  end
-```
-
 - The last statement we need in this block is the provisioner. This is the same provisioner we've used before;
 ```ruby
   config.vm.define "mongo" do |mongo|
@@ -196,7 +184,6 @@ This statement will use a private network for the Mongo box and use a fixed IP a
       vb.memory = "512"
     end
     mongo.vm.network "private_network", ip: "192.168.33.20"
-    mongo.vm.provision "file", source: "files/mongod.conf", destination: "~/mongod.conf"
     mongo.vm.provision "shell", path: "provisioners/install-mongo.sh"
   end
 ```
@@ -228,14 +215,14 @@ The Node application server still needs port forwarding to expose the applicatio
     node.vm.box = "bento/ubuntu-20.04"
     node.vm.network "forwarded_port", guest: 3000, host: 8080
     node.vm.provider "virtualbox" do |vb|
-      vb.memory = "512"
+      vb.memory = "1024"
     end
     node.vm.network "private_network", ip: "192.168.33.10"
     node.vm.provision "shell", path: "provisioners/install-node.sh"
   end
 ```
 
-As above, this block sets the memory to 512 megabytes. Together, both boxes take up about a gigabyte of RAM. The Node box is on the same private network as the Mongo box with a different fixed IP address. And the provisioner is the same as we've used before to install and configure Node.
+As above, this block sets the memory to 1 GB. Together, both boxes take up about a gigabyte of RAM. The Node box is on the same private network as the Mongo box with a different fixed IP address. And the provisioner is the same as we've used before to install and configure Node.
 
 - Lastly we need to change line 9 in server.js to reflect our private ip settings;
 ```js

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Get GPG key
+# Get the GPG key
 curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
 
 # Create a sources list file
@@ -11,7 +11,6 @@ sudo apt-get update
 
 # Install mongo
 sudo apt-get install mongodb-org -y
-# sudo apt-get install -y mongodb-org --allow-unauthenticated
 
 # Copy custom mongo config
 sudo cp /vagrant/files/mongod.conf /etc/mongod.conf
