@@ -12,7 +12,7 @@ We'll be using a simple Node application to demonstrate the steps required to cr
 ### Get the source code
 - Clone the source code for this demonstration from Github.
 ```sh
-git clone https://github.com/bluehackrafestefano/Vagrant_Node_Cluster_Start.git
+git clone https://github.com/bluehackrafestefano/Vagrant_Node_Cluster_Start.git  # FIXME
 ```
 
 - Delete `.git` folder manually or using the terminal command;
